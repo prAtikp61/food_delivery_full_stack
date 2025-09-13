@@ -10,94 +10,80 @@ const initialState = {
 
 export const cartReducer = (state = initialState, action) => {
   switch (action.type) {
-    // ---- Requests ----
     case actionTypes.FIND_CART_REQUEST:
     case actionTypes.GET_ALL_CART_ITEMS_REQUEST:
     case actionTypes.UPDATE_CARTITEM_REQUEST:
     case actionTypes.REMOVE_CARTITEM_REQUEST:
+    case actionTypes.ADD_ITEM_TO_CART_REQUEST:
+    case actionTypes.CLEAR_CART_REQUEST:
       return {
         ...state,
         loading: true,
         error: null,
       };
 
-    // ---- Success ----
+    // THIS IS THE CORRECTED PART
     case actionTypes.FIND_CART_SUCCESS:
     case actionTypes.CLEAR_CART_SUCCESS:
       return {
         ...state,
         loading: false,
         cart: action.payload,
-        cartItems: action.payload?.items || [], // safe default
+        cartItems: action.payload.cartItems || [], // Changed from .items to .cartItems
+      };
+    
+    case actionTypes.ADD_ITEM_TO_CART_SUCCESS:
+      // Check if item already exists to avoid duplicates
+      const existingItem = state.cartItems.find(
+        (item) => item.food.id === action.payload.food.id
+      );
+      if (existingItem) {
+        // If it exists, just update it
+        return {
+          ...state,
+          loading: false,
+          cartItems: state.cartItems.map((item) =>
+            item.food.id === action.payload.food.id ? action.payload : item
+          ),
+        };
+      }
+      // If it's a new item, add it to the array
+      return {
+        ...state,
+        loading: false,
+        cartItems: [...state.cartItems, action.payload],
       };
 
-   case actionTypes.ADD_ITEM_TO_CART_SUCCESS: {
-  const existingItem = state.cartItems.find(
-    (item) => item.id === action.payload.id
-  );
+    case actionTypes.UPDATE_CARTITEM_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        cartItems: state.cartItems.map((item) =>
+          item.id === action.payload.id ? action.payload : item
+        ),
+      };
 
-  if (existingItem) {
-    // update quantity if item already exists
-    return {
-      ...state,
-      loading: false,
-      cartItems: state.cartItems.map((item) =>
-        item.id === action.payload.id
-          ? { ...item, quantity: item.quantity + 1 } // ✅ increase quantity
-          : item
-      ),
-    };
-  } else {
-    // add new item if it doesn’t exist
-    return {
-      ...state,
-      loading: false,
-      cartItems: [...state.cartItems, { ...action.payload, quantity: 1 }],
-    };
-  }
-}
+    case actionTypes.REMOVE_CARTITEM_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        cartItems: state.cartItems.filter(
+          (item) => item.id !== action.payload
+        ),
+      };
 
-
- case actionTypes.UPDATE_CARTITEM_SUCCESS:
-  return {
-    ...state,
-    loading: false,
-    cartItems: state.cartItems.map((item) =>
-      item.id === action.payload.id ? { ...action.payload } : item
-    ),
-  };
-
-
-
- case actionTypes.REMOVE_CARTITEM_SUCCESS:
-  return {
-    ...state,
-    loading: false,
-    cart: action.payload,   // because payload is the full updated cart
-    cartItems: action.payload.items, // if backend returns items inside cart
-  };
-
-
-
-    // ---- Failure ----
-    case actionTypes.REMOVE_CARTITEM_FAILURE:
-    case actionTypes.UPDATE_CARTITEM_FAILURE:
     case actionTypes.FIND_CART_FAILURE:
+    case actionTypes.UPDATE_CARTITEM_FAILURE:
+    case actionTypes.REMOVE_CARTITEM_FAILURE:
       return {
         ...state,
         loading: false,
         error: action.payload,
       };
 
-    // ---- Logout ----
     case LOGOUT:
       localStorage.removeItem("jwt");
-      return {
-        ...state,
-        cartItems: [],
-        cart: null,
-        success: "logout success",
-      };
+      return { ...initialState };
 
     default:
       return state;
