@@ -77,6 +77,7 @@ export const addToFavorite=(jwt,restaurantId)=>async(dispatch)=>{
         const {data}=await api.put(`/api/restaurants/${restaurantId}/add-favorite`,{},{headers:{
             Authorization:`Bearer ${jwt}`
         }})
+       
         dispatch({type:ADD_TO_FAVORITE_SUCCESS,payload:data})
         console.log("added to favorite",data)
     }

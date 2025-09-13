@@ -11,6 +11,7 @@ import CustomerRouters from './Routers/CustomerRouters';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getUser } from './component/State/Authentication/Action';
+import { findcart } from './component/State/Cart/Action';
 
 function App() {
   const dispatch=useDispatch();
@@ -20,6 +21,7 @@ function App() {
   const token = localStorage.getItem("jwt");
   if (token) {
     dispatch(getUser(token));
+      dispatch(findcart(jwt))
   }
 }, [dispatch]);
 
