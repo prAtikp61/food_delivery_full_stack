@@ -81,7 +81,6 @@ export const updateCartItem = (reqData) => {
   return async (dispatch) => {
     dispatch({ type: UPDATE_CARTITEM_REQUEST });
     try {
-      // The body of the request only needs cartItemId and quantity
       const requestBody = {
         cartItemId: reqData.cartItemId,
         quantity: reqData.quantity,
@@ -108,7 +107,8 @@ export const removeCartItem = ({ cartItemId, jwt }) => {
   return async (dispatch) => {
     dispatch({ type: REMOVE_CARTITEM_REQUEST });
     try {
-      const { data } = await api.delete(`/api/cart-item/${cartItemId}/remove`, {
+      // Corrected API endpoint
+      const { data } = await api.delete(`/api/cart-item/${cartItemId}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

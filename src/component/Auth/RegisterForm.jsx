@@ -34,8 +34,8 @@ const handleSubmit=(values)=>{
         <Formik initialValues={initialValues} onSubmit={handleSubmit}>
             <Form>
                     <Field as={TextField}
-                          name="name"
-                           label="name"
+                          name="fullName"
+                           label="fullName"
                             fullWidth variant="outlined" margin="normal">
                             </Field>
                  <Field as={TextField}

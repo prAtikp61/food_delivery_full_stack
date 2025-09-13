@@ -8,6 +8,10 @@ const initialState = {
   error: null,
 };
 
+const calculateCartTotal = (items) => {
+    return items.reduce((total, item) => total + item.totalPrice, 0);
+}
+
 export const cartReducer = (state = initialState, action) => {
   switch (action.type) {
     case actionTypes.FIND_CART_REQUEST:
@@ -22,23 +26,20 @@ export const cartReducer = (state = initialState, action) => {
         error: null,
       };
 
-    // THIS IS THE CORRECTED PART
     case actionTypes.FIND_CART_SUCCESS:
     case actionTypes.CLEAR_CART_SUCCESS:
       return {
         ...state,
         loading: false,
         cart: action.payload,
-        cartItems: action.payload.cartItems || [], // Changed from .items to .cartItems
+        cartItems: action.payload.cartItems || [],
       };
     
     case actionTypes.ADD_ITEM_TO_CART_SUCCESS:
-      // Check if item already exists to avoid duplicates
       const existingItem = state.cartItems.find(
         (item) => item.food.id === action.payload.food.id
       );
       if (existingItem) {
-        // If it exists, just update it
         return {
           ...state,
           loading: false,
@@ -47,29 +48,41 @@ export const cartReducer = (state = initialState, action) => {
           ),
         };
       }
-      // If it's a new item, add it to the array
       return {
         ...state,
         loading: false,
         cartItems: [...state.cartItems, action.payload],
       };
 
+    // THIS IS THE CORRECTED PART FOR THE TOTAL AMOUNT
     case actionTypes.UPDATE_CARTITEM_SUCCESS:
+        const updatedCartItems = state.cartItems.map((item) =>
+            item.id === action.payload.id ? action.payload : item
+        );
+        const newTotal = calculateCartTotal(updatedCartItems);
       return {
         ...state,
         loading: false,
-        cartItems: state.cartItems.map((item) =>
-          item.id === action.payload.id ? action.payload : item
-        ),
+        cartItems: updatedCartItems,
+        cart: {
+            ...state.cart,
+            total: newTotal
+        }
       };
 
     case actionTypes.REMOVE_CARTITEM_SUCCESS:
+        const remainingItems = state.cartItems.filter(
+            (item) => item.id !== action.payload
+        );
+        const remainingTotal = calculateCartTotal(remainingItems);
       return {
         ...state,
         loading: false,
-        cartItems: state.cartItems.filter(
-          (item) => item.id !== action.payload
-        ),
+        cartItems: remainingItems,
+        cart: {
+            ...state.cart,
+            total: remainingTotal
+        }
       };
 
     case actionTypes.FIND_CART_FAILURE:

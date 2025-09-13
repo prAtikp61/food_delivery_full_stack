@@ -11,6 +11,12 @@ const CartItem = ({ item }) => {
     const jwt = localStorage.getItem("jwt");
 
     const handleUpdateCartItem = (num) => {
+        // This is the new logic
+        if (num === -1 && item.quantity === 1) {
+            handleRemoveCartItem();
+            return;
+        }
+
         const data = {
           cartItemId: item.id,
           quantity: item.quantity + num,
@@ -38,7 +44,7 @@ const CartItem = ({ item }) => {
                         <p>{item.food?.name}</p>
                         <div className='flex justify-between items-center'>
                             <div className='flex items-center space-x-1'>
-                                <IconButton onClick={() => handleUpdateCartItem(-1)} disabled={item.quantity <= 1}>
+                                <IconButton onClick={() => handleUpdateCartItem(-1)}>
                                     <RemoveCircleIcon />
                                 </IconButton>
                                 <div className='w-5 h-5 text-xs flex items-center justify-center'>
